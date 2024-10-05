@@ -2,6 +2,7 @@
 #define K_MEANS_H
 
 #include <vector>
+#include <defs.h>
 
 struct trained_k_means_algo_t {
     std::vector<long double> centr1;
