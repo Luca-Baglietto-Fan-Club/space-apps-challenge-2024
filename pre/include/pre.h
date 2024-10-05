@@ -5,11 +5,6 @@
 #include <cstddef>
 #include <vector>
 
-typedef struct {
-    float time;
-    ld velocity;
-} data_point_t;
-
 // HIGH PASS FILTER
 // constexpr long double THRESHOLD_FACTOR = 0.2;
 
