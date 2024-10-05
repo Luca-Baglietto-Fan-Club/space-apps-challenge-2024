@@ -62,7 +62,7 @@ void __smoothing_func(std::vector<std::array<long double, 2>> &data, int pv_cnt,
 
         // std::cout << dyncount << " " << r_size << "\n";
         temp[i] = data[i];
-        temp[i][col] = dyncount/(2*r_size);
+        temp[i][col] = dyncount/(2*r_size) * (data[i][col] < 0 ? -1 : 1);
     }
 
     swap(data, temp);
