@@ -35,7 +35,7 @@ $(BINARY): $(OBJECTS)
 
 -include $(DEPENDS)
 
-%.o : %.cpp Makefile
+(BUILD_DIR)/%.o : (SRC_DIR)/%.cpp Makefile
 	$(info $(OBJECTS))
 	$(CC) -o $@ $< $(CC_FLAGS) -MMD -MP
 
