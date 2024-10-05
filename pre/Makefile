@@ -33,7 +33,7 @@ $(BINARY): $(OBJECTS)
 	mkdir -p $(dir $@)
 	$(LD) -o $@ $^ $(LD_FLAGS)
 
--include $(C_DEPENDS)
+-include $(DEPENDS)
 
 %.o : %.cpp Makefile
 	$(info $(OBJECTS))
