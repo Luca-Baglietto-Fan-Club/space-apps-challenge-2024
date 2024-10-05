@@ -70,27 +70,32 @@ std::size_t bin_search(rapidcsv::Document &doc, float target)
 std::size_t parse12(std::vector<data_point_t> &out) {
     static std::size_t it = 0;
 
-    // std::cout << "inside\n";
+    // andrebbe fatta una funzione che prende l'estremo left e right, e gli Hz 
+    // bamber se non la fai te la faccio io stanotte
+
+    //open (it/2).csv
     rapidcsv::Document doc(std::to_string((it/2)) + ".csv", rapidcsv::LabelParams(0, -1));
 
+    //search for the first datapoint with delta > 43000 
     std::size_t bs = bin_search(doc, 43200.1);
+
+    //if it's the second block, start from binary search
     std::size_t st_point = ((it&1) ? bs : 0);
     std::size_t loop_max = it&1 ? doc.GetRowCount() : bs;
+
+    //current target delta, modified during the loop
     float c_target = it&1 ? 43210 : 10;
 
-    // std::cout << bs << " " << st_point << " " << loop_max << " " << c_target <<  "\n";
-    // std::size_t DATA_POINTS = doc.GetRowCount()-st_point;
-    // out.resize(DATA_POINTS-st_point);
+    //Smoothing statistics
     long double DATA_AVERAGE = 0;
     long double ABS_MIN = 0x3f3f3f3f;
 
     
     //DATA PARSING
-
     bool alt_negative = 0;
-
     long double mean = 0;
     size_t dp_size = 0;
+
     for(std::size_t i = st_point; i < loop_max; i++)
     {
 
@@ -98,12 +103,14 @@ std::size_t parse12(std::vector<data_point_t> &out) {
 
         mean += 1.0/c[2];
         dp_size++;
+        
+        //if datapoint delta > target
         if(c[1] >= c_target)
         {   
 
             data_point_t d;
             d.time = c_target;
-            
+
             assert(mean != 0);
             d.velocity = (long double)dp_size/mean;
 
