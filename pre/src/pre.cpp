@@ -60,7 +60,7 @@ std::size_t bin_search(rapidcsv::Document &doc, float target)
     while(l < r)
     {
         std::size_t mid = (l+r)/2;
-        if(doc.GetCell<float>(1, mid) < target) l = mid;
+        if(doc.GetCell<float>(1, mid) < target) l = mid+1;
         else r = mid;
     }
 
@@ -70,30 +70,54 @@ std::size_t bin_search(rapidcsv::Document &doc, float target)
 std::size_t parse12(std::vector<data_point_t> &out) {
     static std::size_t it = 0;
 
+    // std::cout << "inside\n";
     rapidcsv::Document doc(std::to_string((it/2)) + ".csv", rapidcsv::LabelParams(0, -1));
-    std::size_t st_point = ((it&1) ? bin_search(doc, 43200) : 0);
 
-    std::size_t DATA_POINTS = doc.GetRowCount()-st_point;
+    std::size_t bs = bin_search(doc, 43200.1);
+    std::size_t st_point = ((it&1) ? bs : 0);
+    std::size_t loop_max = it&1 ? doc.GetRowCount() : bs;
+    float c_target = it&1 ? 43210 : 10;
 
-    out.resize(DATA_POINTS-st_point);
+    // std::cout << bs << " " << st_point << " " << loop_max << " " << c_target <<  "\n";
+    // std::size_t DATA_POINTS = doc.GetRowCount()-st_point;
+    // out.resize(DATA_POINTS-st_point);
     long double DATA_AVERAGE = 0;
     long double ABS_MIN = 0x3f3f3f3f;
 
     
     //DATA PARSING
-    for(std::size_t i = st_point; i < DATA_POINTS; i++)
+
+    bool alt_negative = 0;
+
+    long double mean = 0;
+    size_t dp_size = 0;
+    for(std::size_t i = st_point; i < loop_max; i++)
     {
+
         std::vector<long double> c = doc.GetRow<long double>(i);
 
-        data_point_t d;
+        mean += c[2];
+        dp_size++;
+        if(c[1] >= c_target)
+        {   
 
-        d.time = c[1];
-        d.velocity = c[2];
+            data_point_t d;
+            d.time = c_target;
+            d.velocity = mean/(long double)dp_size;
+
+            out.push_back(d);
+
+            c_target+=10;
+            alt_negative = !alt_negative;
+            mean = 0;
+            dp_size = 0;
+        }
 
         DATA_AVERAGE += fabs(c[2]);
         ABS_MIN = std::min(ABS_MIN, (long double)fabs(c[2]));
     }
-    DATA_AVERAGE /= (long double)DATA_POINTS;
+
+    DATA_AVERAGE /= (long double)bs;
 
 
     //SMOOTHING FILTER
@@ -130,6 +154,12 @@ std::size_t parse12(std::vector<data_point_t> &out) {
     //     it++;
     //     block.close();
     // }
+
+    //If there are too many datapoints, clamp them
+    // std::cout << out.size() << "\n";
+
+    assert(out.size() >= DATAPOINTS_PER_12H);
+    out.resize(DATAPOINTS_PER_12H);
 
     it++;
     return it-1;
