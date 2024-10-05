@@ -96,14 +96,16 @@ std::size_t parse12(std::vector<data_point_t> &out) {
 
         std::vector<long double> c = doc.GetRow<long double>(i);
 
-        mean += c[2];
+        mean += 1.0/c[2];
         dp_size++;
         if(c[1] >= c_target)
         {   
 
             data_point_t d;
             d.time = c_target;
-            d.velocity = mean/(long double)dp_size;
+            
+            assert(mean != 0);
+            d.velocity = (long double)dp_size/mean;
 
             out.push_back(d);
 
