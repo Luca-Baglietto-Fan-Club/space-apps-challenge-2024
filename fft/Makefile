@@ -1,14 +1,14 @@
 rwildcard = $(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
 
-BUILD_DIR   := ../build/fft
+BUILD_DIR   := ../build
 INC_DIR     := ./include
 SRC_DIR     := ./src
 
-BINARY      := $(BUILD_DIR)/bin
+BINARY      := $(BUILD_DIR)/fft
 
 SOURCES     := $(call rwildcard, $(SRC_DIR), *.cpp)
-OBJECTS     := $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(SOURCES))
-DEPENDS     := $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.d, $(SOURCES))
+OBJECTS     := $(patsubst %.cpp, %.o, $(SOURCES))
+DEPENDS     := $(patsubst %.cpp, %.d, $(SOURCES))
 
 LD          := g++
 LD_FLAGS    := 
@@ -27,7 +27,7 @@ run:
 	$(BINARY)
 
 clean:
-	$(RMDIR) $(BUILD_DIR)
+	$(RM) $(OBJECTS) $(DEPENDS) $(BINARY)
 
 $(BINARY): $(OBJECTS)
 	mkdir -p $(dir $@)
