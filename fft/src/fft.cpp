@@ -3,18 +3,21 @@
 #include <fftw3.h>
 #include <cassert>
 #include <cmath>
+#include <algorithm>
 
+std::size_t N;
 ld *fft_in;
 fftwl_complex *fft_out;
 fftwl_plan fft_plan;
 
-void init_fft(void) {
-    fft_in  =    fftwl_alloc_real(DATAPOINTS_PER_12H);
-    fft_out = fftwl_alloc_complex(DATAPOINTS_PER_12H);
+void init_fft(std::size_t size) {
+    N = size;
+
+    fft_in  =    fftwl_alloc_real(N);
+    fft_out = fftwl_alloc_complex(N);
 
     fft_plan = fftwl_plan_dft_r2c_1d(
-        DATAPOINTS_PER_12H,
-        fft_in, fft_out,
+        N, fft_in, fft_out,
         FFTW_FORWARD | FFTW_MEASURE
     );
 }
@@ -25,9 +28,9 @@ void kill_fft(void) {
 }
 
 void fft(std::vector<data_point_t> &in, std::vector<wave_t> &out) {
-    assert(in.size() == DATAPOINTS_PER_12H);
+    assert(in.size() == N);
 
-    for(std::size_t i = 0; i < DATAPOINTS_PER_12H; ++i)
+    for(std::size_t i = 0; i < N; ++i)
         fft_in[i] = in[i].velocity;
 
     fftwl_execute(fft_plan);
@@ -36,13 +39,18 @@ void fft(std::vector<data_point_t> &in, std::vector<wave_t> &out) {
 
     out.clear();
 
-    std::size_t delta = DATAPOINTS_PER_12H - FFT_OUT_APPROX;
-    for(std::size_t i = 0; i < FFT_OUT_APPROX; ++i) {
-        auto [real, imaginary] = fft_out[i + delta];
+    for(std::size_t i = 0; i < N; ++i) {
+        auto [real, imaginary] = fft_out[i];
 
         out.push_back((wave_t){
-            (i * SAMPLE_RATE) / DATAPOINTS_PER_12H,
+            (i * SAMPLE_RATE) / N,
             sqrtl(real * real + imaginary * imaginary)
         });
     }
+
+    std::sort(out.begin(), out.end(), [&](const wave_t &a, const wave_t &b) {
+        return a.amplitude > b.amplitude;
+    });
+
+    out.resize(FFT_OUT_APPROX);
 }
