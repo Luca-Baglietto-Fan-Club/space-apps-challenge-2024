@@ -1,6 +1,7 @@
 rwildcard = $(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
 
 BUILD_DIR   := ../build
+GLO_INC_DIR := ../include
 INC_DIR     := ./include
 SRC_DIR     := ./src
 
@@ -11,7 +12,7 @@ OBJECTS     := $(patsubst %.cpp, %.o, $(SOURCES))
 DEPENDS     := $(patsubst %.cpp, %.d, $(SOURCES))
 
 LD          := g++
-LD_FLAGS    := 
+LD_FLAGS    := -lfftw3 -lm
 
 CC          := g++
 CC_FLAGS    := -c -Wall -Werror -Wshadow -I$(INC_DIR)
