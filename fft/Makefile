@@ -15,7 +15,7 @@ LD          := g++
 LD_FLAGS    := -lfftw3 -lm
 
 CC          := g++
-CC_FLAGS    := -c -Wall -Werror -Wshadow -I$(INC_DIR)
+CC_FLAGS    := -c -Wall -Werror -Wshadow -I$(INC_DIR) -I$(GLO_INC_DIR)
 
 RM          := rm -f
 RMDIR       := rm -rf
