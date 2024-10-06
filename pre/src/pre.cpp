@@ -12,6 +12,20 @@
 //     }
 // }
 
+// std::size_t bin_search(rapidcsv::Document &doc, float target)
+// {
+//     std::size_t l = 0, r = doc.GetRowCount()-1;
+
+//     while(l < r)
+//     {
+//         std::size_t mid = (l+r)/2;
+//         if(doc.GetCell<float>(1, mid) < target) l = mid+1;
+//         else r = mid;
+//     }
+
+//     return l;
+// }
+
 void __smoothing_func(std::vector<data_point_t> &data, std::size_t pv_cnt)
 {
 
@@ -28,7 +42,7 @@ void __smoothing_func(std::vector<data_point_t> &data, std::size_t pv_cnt)
     // Range sum value
     long double dyncount = 0;
     
-    for(std::size_t i = 0; i < pv_cnt; i++)
+    for(std::size_t i = 0; i < pv_cnt && i < dataset_size; i++)
     {
         dyncount += fabs(data[i].velocity);
         r_size++;
@@ -41,62 +55,47 @@ void __smoothing_func(std::vector<data_point_t> &data, std::size_t pv_cnt)
             dyncount += fabs(data[i+pv_cnt].velocity);
             r_size++;
         } 
-        if(i-pv_cnt >= 0)
+
+        //  needs (int) casting or it will underflow
+        //  instead of using i-pv_cnt >= 0, use i >= pv_cnt
+        if(i >= pv_cnt)
         {
             dyncount -= fabs(data[i-pv_cnt].velocity);
             r_size--;
         } 
         temp[i].time = data[i].time;
+
         temp[i].velocity = dyncount/(2*r_size) * (data[i].velocity < 0 ? -1 : 1);
     }
 
     swap(data, temp);
 }
 
-std::size_t bin_search(rapidcsv::Document &doc, float target)
-{
-    std::size_t l = 0, r = doc.GetRowCount()-1;
 
-    while(l < r)
-    {
-        std::size_t mid = (l+r)/2;
-        if(doc.GetCell<float>(1, mid) < target) l = mid+1;
-        else r = mid;
-    }
-
-    return l;
-}
-
-std::size_t parse12(std::vector<data_point_t> &out) {
+std::size_t parse12(std::vector<std::vector<data_point_t>> &out) {
     static std::size_t it = 0;
 
-    // andrebbe fatta una funzione che prende l'estremo left e right, e gli Hz 
-    // bamber se non la fai te la faccio io stanotte
+    //open (#it).csv
+    rapidcsv::Document doc(std::to_string(it) + ".csv", rapidcsv::LabelParams(0, -1));
+    std::size_t CSV_LENGTH = (std::size_t) doc.GetRowCount();
 
-    //open (it/2).csv
-    rapidcsv::Document doc(std::to_string((it/2)) + ".csv", rapidcsv::LabelParams(0, -1));
-
-    //search for the first datapoint with delta > 43000 
-    std::size_t bs = bin_search(doc, 43200.1);
-
-    //if it's the second block, start from binary search
-    std::size_t st_point = ((it&1) ? bs : 0);
-    std::size_t loop_max = it&1 ? doc.GetRowCount() : bs;
-
-    //current target delta, modified during the loop
-    float c_target = it&1 ? 43210 : 10;
-
+    //Smoothing statistics
     //Smoothing statistics
     long double DATA_AVERAGE = 0;
     long double ABS_MIN = 0x3f3f3f3f;
 
-    
     //DATA PARSING
     bool alt_negative = 0;
     long double mean = 0;
-    size_t dp_size = 0;
+    std::size_t dp_size = 0;
 
-    for(std::size_t i = st_point; i < loop_max; i++)
+    out.resize(DATA_BLOCKS);
+    std::size_t currentBlock = 0;
+
+    float increment = 1.0/DATA_POINT_FREQ;
+    float c_target = increment;
+
+    for(std::size_t i = 0; i < CSV_LENGTH && currentBlock < DATA_BLOCKS; i++)
     {
 
         std::vector<long double> c = doc.GetRow<long double>(i);
@@ -105,70 +104,51 @@ std::size_t parse12(std::vector<data_point_t> &out) {
         dp_size++;
         
         //if datapoint delta > target
+        
+        //if datapoint delta > target
         if(c[1] >= c_target)
         {   
 
             data_point_t d;
             d.time = c_target;
 
+
             assert(mean != 0);
             d.velocity = (long double)dp_size/mean;
 
-            out.push_back(d);
+            out[currentBlock].push_back(d);
 
-            c_target+=10;
+            c_target += increment;
             alt_negative = !alt_negative;
             mean = 0;
             dp_size = 0;
+
+            if(out[currentBlock].size() >= DATA_POINT_PER_BLOCK)
+                currentBlock++;
         }
 
         DATA_AVERAGE += fabs(c[2]);
         ABS_MIN = std::min(ABS_MIN, (long double)fabs(c[2]));
     }
 
-    DATA_AVERAGE /= (long double)bs;
-
+    DATA_AVERAGE /= (long double)CSV_LENGTH;
 
     //SMOOTHING FILTER
-    for(std::size_t _ = 0; _ < SMOOTHING_PASS; _++)
-        __smoothing_func(out, SMOOTHING_RANGE);
-
-
+    for(auto &block : out)
+        for(std::size_t _ = 0; _ < SMOOTHING_PASS; _++)
+        __smoothing_func(block, SMOOTHING_RANGE);
 
     //HIGH PASS FILTER
     // long double HIGH_PASS_THRESHOLD = ABS_MIN + (DATA_AVERAGE-ABS_MIN)*THRESHOLD_FACTOR;
     // __high_pass(out, HIGH_PASS_THRESHOLD);
 
-
-
-
-    // WRITE DATA IN BLOCKS.CSV in 43500 blocks
-    // TODO:    pass this values to the FTT function
-    //          as structs.
-
-    // int lk = 0;
-    // int lt = 0;
-    // int it = 0;
-    // while(lk < DATA_POINTS)
-    // {
-    //     std::ofstream block("block" + std::to_string(it) + ".csv");
-    //     block << "time_abs(%Y-%m-%dT%H:%M:%S.%f),time_rel(sec),velocity(m/s)\n";
-
-    //     while(lk < DATA_POINTS && out[lk][0] < (long double) (lt+43500))
-    //     {
-    //         block << doc.GetCell<std::string>(0, lk) << ", " <<  out[lk][0] << ", " <<  out[lk][1] << "\n";
-    //         lk++;
-    //     }
-    //     lt = out[lk][0];
-    //     it++;
-    //     block.close();
-    // }
-
-    //If there are too many datapoints, clamp them
-    // std::cout << out.size() << "\n";
-
-    assert(out.size() >= DATAPOINTS_PER_12H);
-    out.resize(DATAPOINTS_PER_12H);
+    // Guarantees blocks are of correct size
+    assert(out.size() == DATA_BLOCKS);
+    for(auto &i : out)
+    {
+        assert(i.size() >= DATA_POINT_PER_BLOCK);
+        i.resize(DATA_POINT_PER_BLOCK);
+    }
 
     it++;
     return it-1;
