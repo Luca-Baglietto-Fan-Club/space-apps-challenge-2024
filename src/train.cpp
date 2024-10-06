@@ -9,6 +9,7 @@
 #include <limits>
 #include <unordered_map>
 #include <algorithm>
+#include <fstream>
 
 constexpr std::size_t CSV_COUNT = 76;
 
@@ -22,11 +23,13 @@ int main(void) {
 
     std::cerr << "Initialized FFT of size " << DATA_POINT_PER_BLOCK << "." << std::endl;
 
+    std::vector<std::size_t> indexes;
     std::vector<std::vector<data_point_t>> fft_input;
     for(std::size_t i = 0; i < CSV_COUNT; ++i) {
         for(std::size_t j = 0; j < DATA_BLOCKS; ++j) {
             if(csv[i][j].size() < DATA_POINT_PER_BLOCK) continue;
             fft_input.push_back(csv[i][j]);
+            indexes.push_back(i * DATA_BLOCKS + j);
         }
     }
 
@@ -45,11 +48,44 @@ int main(void) {
     //     }
     // }
 
+    std::ifstream quake_file("quake");
+    std::ifstream noise_file("noise");
+
+    std::vector<std::size_t> quake_indexes;
+    std::vector<std::size_t> noise_indexes;
+
+    std::size_t N_quake; quake_file >> N_quake;
+    for (std::size_t i = 0; i < N_quake; i++) {
+        std::size_t n_quake; quake_file >> n_quake;
+        for (std::size_t j = 0; j < n_quake; j++) {
+            std::size_t value; quake_file >> value;
+            quake_indexes.push_back(DATA_BLOCKS * i + value);
+        }
+    }
+
+    std::size_t N_noise; noise_file >> N_noise;
+    for (std::size_t i = 0; i < N_noise; i++) {
+        std::size_t n_noise; noise_file >> n_noise;
+        for (std::size_t j = 0; j < n_noise; j++) {
+            std::size_t value; noise_file >> value;
+            noise_indexes.push_back(DATA_BLOCKS * i + value);
+        }
+    }
+
     std::cerr << "Created FFT Input Array." << std::endl;
 
+    std::vector<std::vector<wave_t>> quakes;
+    std::vector<std::vector<wave_t>> noise;
+
     std::vector<std::vector<wave_t>> fft_output(fft_input.size());
-    for(std::size_t i = 0; i < fft_input.size(); ++i)
+    for(std::size_t i = 0; i < fft_input.size(); ++i) {
         fft(fft_input[i], fft_output[i]);
+        if (std::find(quake_indexes.begin(), quake_indexes.end(), indexes[i]) != quake_indexes.end()) {
+            quakes.push_back(fft_output[i]);
+        } else if (std::find(noise_indexes.begin(), noise_indexes.end(), indexes[i]) != noise_indexes.end()) {
+            noise.push_back(fft_output[i]);
+        }
+    }
 
     std::cerr << "Ran FFT on " << fft_output.size() << " inputs." << std::endl; 
 
@@ -74,16 +110,27 @@ int main(void) {
         return avg_amplitude[get_key(a)] > avg_amplitude[get_key(b)];
     });
 
-    std::size_t index_max = fft_output.size() *  1 / 8;
-    std::size_t index_min = fft_output.size() - 1;
+    std::vector<ld> seed1(K_MEANS_DIMENSIONS);
+    for (auto &quake: quakes) {
+        for (std::size_t j = 0; j < FFT_OUT_APPROX; j++) {
+            seed1[j * 2]     += quake[j].amplitude;
+            seed1[j * 2 + 1] += quake[j].frequency;
+        }
+    }
+    for (auto &x: seed1) {
+        x /= quakes.size();
+    }
 
-    std::vector<ld> seed1;
-    for(auto &[frequency, amplitude]: fft_output[index_max])
-        seed1.push_back(amplitude), seed1.push_back(frequency);
-
-    std::vector<ld> seed2;
-    for(auto &[frequency, amplitude]: fft_output[index_min])
-        seed2.push_back(amplitude), seed2.push_back(frequency);
+    std::vector<ld> seed2(K_MEANS_DIMENSIONS);
+    for (auto &noi: noise) {
+        for (std::size_t j = 0; j < FFT_OUT_APPROX; j++) {
+            seed2[j * 2]     += noi[j].amplitude;
+            seed2[j * 2 + 1] += noi[j].frequency;
+        }
+    }
+    for (auto &x: seed2) {
+        x /= noise.size();
+    }
 
     trained_k_means_algo_t train_output = train_k_means(seed1, seed2, fft_output);
 
