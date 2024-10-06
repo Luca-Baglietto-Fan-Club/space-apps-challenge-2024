@@ -1,4 +1,7 @@
 #include <k_means.h>
+#include <iostream>
+
+std::vector<ld> centr1, centr2;
 
 ld squared_euclidean_distance(std::vector<ld> &pointA, std::vector<ld> &pointB) {
     ld res = 0;
@@ -8,9 +11,10 @@ ld squared_euclidean_distance(std::vector<ld> &pointA, std::vector<ld> &pointB) 
     return res;
 }
 
-trained_k_means_algo_t train_k_means(std::vector<ld> &seed1, std::vector<ld> &seed2, std::vector<std::vector<wave_t>> &data) {
-    std::vector<ld> centr1 = seed1;
-    std::vector<ld> centr2 = seed2;
+trained_k_means_algo_t train_k_means(std::vector<ld> &seed1,
+   std::vector<ld> &seed2, std::vector<std::vector<wave_t>> &data) {
+    centr1 = seed1;
+    centr2 = seed2;
 
     std::vector<ld> distances1(data.size());
     std::vector<ld> distances2(data.size());
@@ -28,6 +32,16 @@ trained_k_means_algo_t train_k_means(std::vector<ld> &seed1, std::vector<ld> &se
     std::vector<std::size_t> prevAssigned2;
 
     while (true) {
+        for(auto &c1: centr1)
+            std::cerr << c1 << " ";
+        std::cerr << std::endl;
+
+        for(auto &c2: centr2)
+            std::cerr << c2 << " ";
+        std::cerr << std::endl;
+        
+        std::cerr << "===========================================" << std::endl;
+
         for (std::size_t i = 0; i < data.size(); i++) {
             distances1[i] = squared_euclidean_distance(dataPoints[i], centr1);
             distances2[i] = squared_euclidean_distance(dataPoints[i], centr2);

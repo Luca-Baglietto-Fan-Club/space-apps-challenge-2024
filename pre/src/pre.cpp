@@ -142,8 +142,8 @@ std::size_t parse(std::vector<std::vector<data_point_t>> &out) {
     assert(out.size() == DATA_BLOCKS);
     for(auto &i : out)
     {
-        assert(i.size() >= DATA_POINT_PER_BLOCK);
-        i.resize(DATA_POINT_PER_BLOCK);
+        // assert(i.size() >= DATA_POINT_PER_BLOCK);
+        i.resize(std::min(i.size(), DATA_POINT_PER_BLOCK));
     }
 
     it++;

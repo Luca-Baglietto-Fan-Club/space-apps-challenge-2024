@@ -5,7 +5,8 @@
 
 using ld = long double;
 
-constexpr std::size_t FFT_OUT_APPROX = 32;
+constexpr std::size_t K_MEANS_DIMENSIONS = 64;
+constexpr std::size_t FFT_OUT_APPROX = K_MEANS_DIMENSIONS / 2;
 constexpr std::size_t DATA_POINT_PER_BLOCK = 10800;
 constexpr std::size_t DATA_BLOCKS = 8;
 constexpr ld DATA_POINT_FREQ = 1.0l;
@@ -18,7 +19,6 @@ typedef struct {
 typedef struct {
     ld frequency;
     ld amplitude;
-    ld phase;
 } wave_t;
 
 #endif /* __SAC24_DEFS_H */
