@@ -2,7 +2,7 @@
 #include <cstddef>
 #include <string>
 #include <rapidcsv.h>
-
+#include <limits>
 
 // void __high_pass(std::vector<std::array<long double, 2>> &data, long double threshold, int col = 1)
 // {
@@ -77,6 +77,9 @@ std::size_t parse(std::vector<std::vector<data_point_t>> &out) {
 
     //open (#it).csv
     rapidcsv::Document doc(std::to_string(it) + ".csv", rapidcsv::LabelParams(0, -1));
+
+    assert(doc.GetRowCount() > 0 && "PARSING: CSV file is empty or failed to open.");
+
     std::size_t CSV_LENGTH = (std::size_t) doc.GetRowCount();
 
     //Smoothing statistics
@@ -109,9 +112,10 @@ std::size_t parse(std::vector<std::vector<data_point_t>> &out) {
             data_point_t d;
             d.time = c_target;
 
-            assert(mean != 0);
+            assert(mean != 0 && "PARSING: Mean is 0.");
             d.velocity = (long double)dp_size/mean;
 
+            assert((not std::isnan(d.velocity)) && "PARSING: Detected NaN value in parsing.");
             out[currentBlock].push_back(d);
 
             c_target += increment;
@@ -139,7 +143,7 @@ std::size_t parse(std::vector<std::vector<data_point_t>> &out) {
     // __high_pass(out, HIGH_PASS_THRESHOLD);
 
     // Guarantees blocks are of correct size
-    assert(out.size() == DATA_BLOCKS);
+    assert(out.size() == DATA_BLOCKS && "PARSING: out vector is of incorrect size.");
     for(auto &i : out)
     {
         // assert(i.size() >= DATA_POINT_PER_BLOCK);
