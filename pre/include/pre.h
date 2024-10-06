@@ -13,6 +13,6 @@ constexpr int SMOOTHING_PASS = 1;
 constexpr int SMOOTHING_RANGE = 500;
 
 
-std::size_t parse12(std::vector<data_point_t> &out);
+std::size_t parse12(std::vector<std::vector<data_point_t>> &out);
 
 #endif /* __SAC24_PRE_H */
