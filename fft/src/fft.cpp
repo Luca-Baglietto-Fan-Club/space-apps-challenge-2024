@@ -27,7 +27,7 @@ void kill_fft(void) {
     fftwl_free(fft_in), fftwl_free(fft_out);
 }
 
-void fft(std::vector<data_point_t> &in, std::vector<wave_t> &out) {
+void fft(const std::vector<data_point_t> &in, std::vector<wave_t> &out) {
     assert(in.size() == N);
 
     for(std::size_t i = 0; i < N; ++i)
@@ -44,7 +44,8 @@ void fft(std::vector<data_point_t> &in, std::vector<wave_t> &out) {
 
         out.push_back((wave_t){
             (i * SAMPLE_RATE) / N,
-            sqrtl(real * real + imaginary * imaginary)
+            sqrtl(real * real + imaginary * imaginary),
+            atanl(imaginary / real)
         });
     }
 
