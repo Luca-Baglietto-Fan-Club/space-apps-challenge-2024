@@ -74,6 +74,7 @@ void __smoothing_func(std::vector<data_point_t> &data, std::size_t pv_cnt)
 
 std::size_t parse(std::vector<std::vector<data_point_t>> &out) {
     static std::size_t it = 0;
+    std::cerr << "Parsing file " << it << "." << std::endl;
 
     //open (#it).csv
     rapidcsv::Document doc(std::to_string(it) + ".csv", rapidcsv::LabelParams(0, -1));

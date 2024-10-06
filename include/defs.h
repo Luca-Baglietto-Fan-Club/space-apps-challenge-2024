@@ -5,7 +5,7 @@
 
 using ld = long double;
 
-constexpr std::size_t K_MEANS_DIMENSIONS = 64;
+constexpr std::size_t K_MEANS_DIMENSIONS = 48;
 constexpr std::size_t FFT_OUT_APPROX = K_MEANS_DIMENSIONS / 2;
 constexpr std::size_t DATA_POINT_PER_BLOCK = 10800;
 constexpr std::size_t DATA_BLOCKS = 8;

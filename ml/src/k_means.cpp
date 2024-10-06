@@ -24,7 +24,7 @@ trained_k_means_algo_t train_k_means(std::vector<ld> &seed1,
         dataPoints[i].resize(K_MEANS_DIMENSIONS);
         for (std::size_t j = 0; j < data[i].size(); j++) {
             dataPoints[i][j * 2] = data[i][j].amplitude;
-            dataPoints[i][j * 2 + 1] = data[i][j].amplitude;
+            dataPoints[i][j * 2 + 1] = data[i][j].frequency;
         }
     }
 
@@ -32,6 +32,8 @@ trained_k_means_algo_t train_k_means(std::vector<ld> &seed1,
     std::vector<std::size_t> prevAssigned2;
 
     while (true) {
+        std::cerr << prevAssigned1.size() << " " << prevAssigned2.size() << std::endl;
+
         for(auto &c1: centr1)
             std::cerr << c1 << " ";
         std::cerr << std::endl;
