@@ -28,6 +28,7 @@ typedef struct {
 typedef struct {
     ld frequency;
     ld amplitude;
+    ld phase;
 } wave_t;
 
 #endif /* __SAC24_DEFS_H */
