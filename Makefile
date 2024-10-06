@@ -41,7 +41,7 @@ LD          := g++
 LD_FLAGS    := -lm -lfftw3l
 
 CC          := g++
-CC_FLAGS    := -c -Wall -Werror -Wshadow $(foreach inc, $(INCLUDES), -I$(inc))
+CC_FLAGS    := -c -Wall -Werror -Wshadow -O2 $(foreach inc, $(INCLUDES), -I$(inc))
 
 RM          := rm -f
 RMDIR       := rm -rf
@@ -61,7 +61,7 @@ execute_run:
 
 clean:
 	$(RM) $(OBJECTS) $(DEPENDS)
-	$(RMDIR) $(BUILD_DIR)
+# $(RMDIR) $(BUILD_DIR)
 
 $(TRAIN_BIN): $(TRAIN_OBJ) $(OBJECTS)
 	mkdir -p $(dir $@)
@@ -74,7 +74,6 @@ $(RUN_BIN): $(RUN_OBJ) $(OBJECTS)
 -include $(DEPENDS)
 
 %.o : %.cpp Makefile
-	$(info $(OBJECTS))
 	$(CC) -o $@ $< $(CC_FLAGS) -MMD -MP
 
 .PHONY: all train run execute_train execute_run clean

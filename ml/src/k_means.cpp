@@ -16,6 +16,8 @@ trained_k_means_algo_t train_k_means(std::vector<ld> &seed1,
     centr1 = seed1;
     centr2 = seed2;
 
+    std::cerr << "seed1, centr1 size: " << seed1.size() << ", " << centr1.size() << std::endl;
+
     std::vector<ld> distances1(data.size());
     std::vector<ld> distances2(data.size());
 
@@ -23,7 +25,7 @@ trained_k_means_algo_t train_k_means(std::vector<ld> &seed1,
     for (std::size_t i = 0; i < data.size(); i++) {
         dataPoints[i].resize(K_MEANS_DIMENSIONS);
         for (std::size_t j = 0; j < data[i].size(); j++) {
-            dataPoints[i][j * 2] = data[i][j].amplitude;
+            dataPoints[i][j * 2]     = data[i][j].amplitude;
             dataPoints[i][j * 2 + 1] = data[i][j].frequency;
         }
     }

@@ -14,6 +14,8 @@
 constexpr std::size_t CSV_COUNT = 64;
 
 int main(void) {
+    std::cout << CSV_COUNT << std::endl;
+
     init_fft(DATA_POINT_PER_BLOCK);
 
     trained_k_means_algo_t train_data;
@@ -27,6 +29,8 @@ int main(void) {
     
     std::cerr << "Parsed Training Data." << std::endl;
 
+    std::vector<std::vector<std::size_t>> quakes(CSV_COUNT, std::vector<std::size_t>(0));
+
     for(std::size_t i = 0; i < CSV_COUNT; ++i) {
         std::vector<std::vector<data_point_t>> next_block; 
         std::size_t it = parse(next_block);
@@ -34,9 +38,15 @@ int main(void) {
 
         std::vector<std::vector<data_point_t>> fft_input;
 
+        std::vector<std::size_t> indices;
         for(std::size_t j = 0; j < DATA_BLOCKS; ++j) {
-            if(next_block[j].size() < DATA_POINT_PER_BLOCK) continue;
+            if(next_block[j].size() < DATA_POINT_PER_BLOCK) {
+                std::cerr << "Missing Data: " << it << " + " << j << std::endl; 
+
+                continue;
+            }
             fft_input.push_back(next_block[j]);
+            indices.push_back(j);
         }
 
         std::cerr << "Created FFT Input Array." << std::endl;
@@ -55,9 +65,20 @@ int main(void) {
                 query.push_back(amplitude), query.push_back(frequency);
 
             bool is_quake = k_means_query(train_data, query);
+            std::cerr << it << " + " << indices[j] << ": " << (is_quake ? "Quake." : "Noise.") << std::endl;
 
-            std::cout << it << " + " << j << ": " << (is_quake ? "Quake." : "Noise.") << std::endl;
+            if(!is_quake) continue;
+
+            quakes[it].push_back(indices[j]);
         }
+    }
+
+    constexpr std::size_t hours3 = 3600 * 3;
+
+    for(auto &qs: quakes) {
+        std::cout << qs.size() << " ";
+        for(auto &q: qs) std::cout << hours3 * q << " " << hours3 * (q + 1) - 1 << " ";
+        std::cout << std::endl;
     }
 
     kill_fft();

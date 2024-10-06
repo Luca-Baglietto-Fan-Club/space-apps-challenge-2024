@@ -44,7 +44,7 @@ void fft(const std::vector<data_point_t> &in, std::vector<wave_t> &out) {
 
     out.clear();
 
-    for(std::size_t i = N/8; i < N; ++i) {
+    for(std::size_t i = N/4; i < N; ++i) {
         auto [real, imaginary] = fft_out[i];
 
         /* Apparently, this is how you check for NaN */
@@ -55,6 +55,8 @@ void fft(const std::vector<data_point_t> &in, std::vector<wave_t> &out) {
             sqrtl(real * real + imaginary * imaginary)
         });
     }
+
+    //sus
 
     // std::cerr << "FFT: Created output vector." << std::endl;
 

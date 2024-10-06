@@ -117,6 +117,7 @@ int main(void) {
             seed1[j * 2 + 1] += quake[j].frequency;
         }
     }
+
     for (auto &x: seed1) {
         x /= quakes.size();
     }
@@ -131,6 +132,8 @@ int main(void) {
     for (auto &x: seed2) {
         x /= noise.size();
     }
+
+    std::cerr << "seed1, seed2 size: " << seed1.size() << ", " << seed2.size() << std::endl;
 
     trained_k_means_algo_t train_output = train_k_means(seed1, seed2, fft_output);
 
