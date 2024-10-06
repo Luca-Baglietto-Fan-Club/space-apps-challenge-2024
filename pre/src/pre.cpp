@@ -72,7 +72,7 @@ void __smoothing_func(std::vector<data_point_t> &data, std::size_t pv_cnt)
 }
 
 
-std::size_t parse12(std::vector<std::vector<data_point_t>> &out) {
+std::size_t parse(std::vector<std::vector<data_point_t>> &out) {
     static std::size_t it = 0;
 
     //open (#it).csv
