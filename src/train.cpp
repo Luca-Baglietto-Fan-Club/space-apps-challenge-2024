@@ -7,7 +7,7 @@
 #include <cstdio>
 #include <iostream>
 
-constexpr std::size_t CSV_COUNT = 76;
+constexpr std::size_t CSV_COUNT = 1;
 
 int main(void) {
     std::vector<std::vector<std::vector<data_point_t>>> csv(CSV_COUNT);
@@ -27,8 +27,6 @@ int main(void) {
         fft(fft_input[i], fft_output[i]);
 
     fft_input.clear();
-
-    std::freopen("out", "w", stdout);
 
     for(auto &waves: fft_output) {
         for(auto &[frequency, amplitude, phase]: waves) {

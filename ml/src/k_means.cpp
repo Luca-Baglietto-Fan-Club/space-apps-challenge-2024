@@ -2,7 +2,7 @@
 
 ld squared_euclidean_distance(std::vector<ld> &pointA, std::vector<ld> &pointB) {
     ld res = 0;
-    for (int i = 0; i < pointA.size(); i++) {
+    for (std::size_t i = 0; i < pointA.size(); i++) {
         res += (pointA[i] - pointB[i]) * (pointA[i] - pointB[i]);
     }
     return res;
@@ -16,25 +16,25 @@ trained_k_means_algo_t train_k_means(std::vector<ld> &seed1, std::vector<ld> &se
     std::vector<ld> distances2(data.size());
 
     std::vector<std::vector<ld>> dataPoints(data.size());
-    for (int i = 0; i < data.size(); i++) {
+    for (std::size_t i = 0; i < data.size(); i++) {
         dataPoints[i].resize(FFT_OUT_APPROX * 2);
-        for (int j = 0; j < data[i].size(); j++) {
+        for (std::size_t j = 0; j < data[i].size(); j++) {
             dataPoints[i][j * 2] = data[i][j].amplitude;
             dataPoints[i][j * 2 + 1] = data[i][j].amplitude;
         }
     }
 
-    std::vector<int> prevAssigned1;
-    std::vector<int> prevAssigned2;
+    std::vector<std::size_t> prevAssigned1;
+    std::vector<std::size_t> prevAssigned2;
 
     while (true) {
-        for (int i = 0; i < data.size(); i++) {
+        for (std::size_t i = 0; i < data.size(); i++) {
             distances1[i] = squared_euclidean_distance(dataPoints[i], centr1);
             distances2[i] = squared_euclidean_distance(dataPoints[i], centr2);
         }
-        std::vector<int> assigned1;
-        std::vector<int> assigned2;
-        for (int i = 0; i < data.size(); i++) {
+        std::vector<std::size_t> assigned1;
+        std::vector<std::size_t> assigned2;
+        for (std::size_t i = 0; i < data.size(); i++) {
             if (distances1[i] < distances2[i]) {
                 assigned1.push_back(i);
             } else {
@@ -47,19 +47,19 @@ trained_k_means_algo_t train_k_means(std::vector<ld> &seed1, std::vector<ld> &se
         std::vector<ld> newCentr1(centr1.size());
         std::vector<ld> newCentr2(centr2.size());
         for (auto &i: assigned1) {
-            for (int j = 0; j < dataPoints[i].size(); j++) {
+            for (std::size_t j = 0; j < dataPoints[i].size(); j++) {
                 newCentr1[j] += dataPoints[i][j];
             }
         }
-        for (int i = 0; i < newCentr1.size(); i++) {
+        for (std::size_t i = 0; i < newCentr1.size(); i++) {
             newCentr1[i] /= assigned1.size();
         }
         for (auto &i: assigned2) {
-            for (int j = 0; j < dataPoints[i].size(); j++) {
+            for (std::size_t j = 0; j < dataPoints[i].size(); j++) {
                 newCentr2[j] += dataPoints[i][j];
             }
         }
-        for (int i = 0; i < newCentr2.size(); i++) {
+        for (std::size_t i = 0; i < newCentr2.size(); i++) {
             newCentr2[i] /= newCentr2.size();
         }
         centr1 = newCentr1;
