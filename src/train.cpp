@@ -13,37 +13,37 @@
 constexpr std::size_t CSV_COUNT = 76;
 
 int main(void) {
-    // std::vector<std::vector<std::vector<data_point_t>>> csv(CSV_COUNT);
-    // for(auto &csv_block: csv) parse(csv_block);
+    std::vector<std::vector<std::vector<data_point_t>>> csv(CSV_COUNT);
+    for(auto &csv_block: csv) parse(csv_block);
 
-    // std::cerr << "Successfully parsed " << CSV_COUNT << " files." << std::endl;
+    std::cerr << "Successfully parsed " << CSV_COUNT << " files." << std::endl;
 
     init_fft(DATA_POINT_PER_BLOCK);
 
     std::cerr << "Initialized FFT of size " << DATA_POINT_PER_BLOCK << "." << std::endl;
 
     std::vector<std::vector<data_point_t>> fft_input;
-    // for(std::size_t i = 0; i < CSV_COUNT; ++i) {
-    //     for(std::size_t j = 0; j < DATA_BLOCKS; ++j) {
-    //         if(csv[i][j].size() < DATA_POINT_PER_BLOCK) continue;
-    //         fft_input.push_back(csv[i][j]);
-    //     }
-    // }
-
-    // csv.clear();
-
-    std::size_t N; std::cin >> N;
-    fft_input.resize(N);
-
-    for(std::size_t i = 0; i < N; ++i) {
-        fft_input[i].resize(DATA_POINT_PER_BLOCK);
-
-        for(std::size_t j = 0; j < DATA_POINT_PER_BLOCK; ++j) {
-            auto &[time, velocity] = fft_input[i][j];
-
-            std::cin >> time >> velocity;
+    for(std::size_t i = 0; i < CSV_COUNT; ++i) {
+        for(std::size_t j = 0; j < DATA_BLOCKS; ++j) {
+            if(csv[i][j].size() < DATA_POINT_PER_BLOCK) continue;
+            fft_input.push_back(csv[i][j]);
         }
     }
+
+    csv.clear();
+
+    // std::size_t N; std::cin >> N;
+    // fft_input.resize(N);
+
+    // for(std::size_t i = 0; i < N; ++i) {
+    //     fft_input[i].resize(DATA_POINT_PER_BLOCK);
+
+    //     for(std::size_t j = 0; j < DATA_POINT_PER_BLOCK; ++j) {
+    //         auto &[time, velocity] = fft_input[i][j];
+
+    //         std::cin >> time >> velocity;
+    //     }
+    // }
 
     std::cerr << "Created FFT Input Array." << std::endl;
 
