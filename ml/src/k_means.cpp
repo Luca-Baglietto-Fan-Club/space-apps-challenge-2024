@@ -21,7 +21,7 @@ trained_k_means_algo_t train_k_means(std::vector<ld> &seed1,
 
     std::vector<std::vector<ld>> dataPoints(data.size());
     for (std::size_t i = 0; i < data.size(); i++) {
-        dataPoints[i].resize(FFT_OUT_APPROX * 2);
+        dataPoints[i].resize(K_MEANS_DIMENSIONS);
         for (std::size_t j = 0; j < data[i].size(); j++) {
             dataPoints[i][j * 2] = data[i][j].amplitude;
             dataPoints[i][j * 2 + 1] = data[i][j].amplitude;
@@ -74,7 +74,7 @@ trained_k_means_algo_t train_k_means(std::vector<ld> &seed1,
             }
         }
         for (std::size_t i = 0; i < newCentr2.size(); i++) {
-            newCentr2[i] /= newCentr2.size();
+            newCentr2[i] /= assigned2.size();
         }
         centr1 = newCentr1;
         centr2 = newCentr2;
