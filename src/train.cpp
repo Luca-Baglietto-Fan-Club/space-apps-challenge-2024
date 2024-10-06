@@ -7,33 +7,31 @@
 #include <cstdio>
 #include <iostream>
 
-constexpr std::size_t DATA_COUNT = 152;
+constexpr std::size_t CSV_COUNT = 76;
 
 int main(void) {
-    std::vector<std::vector<data_point_t>> csv12(DATA_COUNT);
-    for(std::size_t i = 0; i < DATA_COUNT; ++i)
-        parse12(csv12[i]);
+    std::vector<std::vector<std::vector<data_point_t>>> csv(CSV_COUNT);
+    for(auto &csv_block: csv) parse(csv_block);
 
-    init_fft(DATAPOINTS_PER_12H);
+    init_fft(DATA_POINT_PER_BLOCK);
 
-    std::vector<std::vector<data_point_t>> fft_input(DATA_COUNT - 1);
-    for(std::size_t i = 0; i < DATA_COUNT - 1; ++i) {
-        for(auto item: csv12[i])     fft_input[i].push_back(item);
-        for(auto item: csv12[i + 1]) fft_input[i].push_back(item);
-    }
+    std::vector<std::vector<data_point_t>> fft_input(CSV_COUNT * DATA_BLOCKS);
+    for(std::size_t i = 0; i < CSV_COUNT; ++i)
+        for(std::size_t j = 0; j < DATA_BLOCKS; ++j)
+            fft_input[i * DATA_BLOCKS + j] = csv[i][j];
 
-    csv12.clear();
+    csv.clear();
 
-    std::vector<std::vector<wave_t>> fft_output(DATA_COUNT - 1);
-    for(std::size_t i = 0; i < DATA_COUNT - 1; ++i)
+    std::vector<std::vector<wave_t>> fft_output(fft_input.size());
+    for(std::size_t i = 0; i < fft_input.size(); ++i)
         fft(fft_input[i], fft_output[i]);
 
     fft_input.clear();
 
     std::freopen("out", "w", stdout);
 
-    for(std::size_t i = 0; i < DATA_COUNT - 1; ++i) {
-        for(auto [frequency, amplitude, phase]: fft_output[i]) {
+    for(auto &waves: fft_output) {
+        for(auto &[frequency, amplitude, phase]: waves) {
             std::cout << "F: " << frequency <<
                 "; A: " << amplitude <<
                 "; P: " << phase <<

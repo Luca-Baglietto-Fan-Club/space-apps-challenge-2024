@@ -43,7 +43,7 @@ void fft(const std::vector<data_point_t> &in, std::vector<wave_t> &out) {
         auto [real, imaginary] = fft_out[i];
 
         out.push_back((wave_t){
-            (i * SAMPLE_RATE) / N,
+            (i * DATA_POINT_FREQ) / N,
             sqrtl(real * real + imaginary * imaginary),
             atanl(imaginary / real)
         });
